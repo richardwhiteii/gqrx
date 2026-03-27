@@ -58,6 +58,7 @@
 /* DSP */
 #include "receiver.h"
 #include "remote_control_settings.h"
+#include "remote_control_https.h"
 
 #include "qtgui/bookmarkstaglist.h"
 #include "qtgui/bandplan.h"
@@ -116,6 +117,9 @@ MainWindow::MainWindow(const QString& cfgfile, bool edit_conf, QWidget *parent) 
 
     // remote controller
     remote = new RemoteControl();
+
+    // HTTPS remote controller
+    remoteHttps = new RemoteControlHttps();
 
     /* meter timer */
     meter_timer = new QTimer(this);
@@ -353,6 +357,12 @@ MainWindow::MainWindow(const QString& cfgfile, bool edit_conf, QWidget *parent) 
     connect(remote, SIGNAL(newAudioMuted(bool)), uiDockAudio, SLOT(setAudioMuted(bool)));
     connect(uiDockAudio, SIGNAL(audioMuted(bool)), remote, SLOT(setAudioMuted(bool)));
 
+    // HTTPS remote control
+    connect(remoteHttps, SIGNAL(newFrequency(qint64)), this, SLOT(setNewFrequency(qint64)));
+    connect(remoteHttps, SIGNAL(newDemodulator(QString)), this, SLOT(selectDemod(QString)));
+    connect(remoteHttps, SIGNAL(newSquelchThreshold(double)), this, SLOT(setSqlLevel(double)));
+    connect(remoteHttps, SIGNAL(newAudioRecorderStatus(bool)), this, SLOT(setAudioRecorderStatus(bool)));
+
     rds_timer = new QTimer(this);
     connect(rds_timer, SIGNAL(timeout()), this, SLOT(rdsTimeout()));
 
@@ -450,6 +460,7 @@ MainWindow::~MainWindow()
     delete uiDockRDS;
     delete rx;
     delete remote;
+    delete remoteHttps;
     delete qsvg_dummy;
 }
 
@@ -717,6 +728,16 @@ bool MainWindow::loadConfig(const QString& cfgfile, bool check_crash,
        ui->actionRemoteControl->setChecked(true);
     }
 
+    // HTTPS remote control settings
+    bool httpsEnabled = m_settings->value("https_control/enabled", false).toBool();
+    if (httpsEnabled)
+    {
+        int httpsPort = m_settings->value("https_control/port", 443).toInt();
+        QString certFilePath = m_settings->value("https_control/cert_file_path", "").toString();
+        QString keyFilePath = m_settings->value("https_control/key_file_path", "").toString();
+        remoteHttps->startServer(httpsPort, certFilePath, keyFilePath);
+    }
+
     emit m_recent_config->configLoaded(m_settings->fileName());
 
     return conf_ok;
@@ -807,6 +828,12 @@ void MainWindow::storeSession()
                 m_settings->setValue("receiver/filter_high_cut", fhi);
             }
         }
+
+        // Save HTTPS remote control settings
+        m_settings->setValue("https_control/enabled", remoteHttps->isServerRunning());
+        m_settings->setValue("https_control/port", remoteHttps->getPort());
+        m_settings->setValue("https_control/cert_file_path", remoteHttps->getCertFilePath());
+        m_settings->setValue("https_control/key_file_path", remoteHttps->getKeyFilePath());
     }
 }
 
@@ -1655,7 +1682,6 @@ void MainWindow::startIqRecording(const QString& recdir, const QString& format)
     bool ok = true;
     if (sigmf) {
         auto meta = QJsonDocument { QJsonObject {
-            {"global", QJsonObject {
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
                 {"core:datatype", "cf32_be"},
 #else
@@ -2166,6 +2192,33 @@ void MainWindow::on_actionRemoteConfig_triggered()
     delete rcs;
 }
 
+/** HTTPS remote control configuration button (or menu item) clicked. */
+void MainWindow::on_actionHttpsConfig_triggered()
+{
+    auto *rcs = new RemoteControlSettings();
+
+    rcs->setPort(remoteHttps->getPort());
+    rcs->setHosts(remoteHttps->getHosts());
+    rcs->setHttpsEnabled(remoteHttps->isServerRunning());
+    rcs->setCertFilePath(remoteHttps->getCertFilePath());
+    rcs->setKeyFilePath(remoteHttps->getKeyFilePath());
+
+    if (rcs->exec() == QDialog::Accepted)
+    {
+        remoteHttps->stopServer();
+        remoteHttps->setPort(rcs->getPort());
+        remoteHttps->setHosts(rcs->getHosts());
+        remoteHttps->setCertFilePath(rcs->getCertFilePath());
+        remoteHttps->setKeyFilePath(rcs->getKeyFilePath());
+
+        if (rcs->getHttpsEnabled())
+        {
+            remoteHttps->startServer(rcs->getPort(), rcs->getCertFilePath(), rcs->getKeyFilePath());
+        }
+    }
+
+    delete rcs;
+}
 
 #define DATA_BUFFER_SIZE 48000
 

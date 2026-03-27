@@ -46,6 +46,18 @@ public:
     void setHosts(QStringList hosts);
     QStringList getHosts(void) const;
 
+    void setHttpsEnabled(bool enabled);
+    bool getHttpsEnabled(void) const;
+
+    void setCertFilePath(const QString &filePath);
+    QString getCertFilePath(void) const;
+
+    void setKeyFilePath(const QString &filePath);
+    QString getKeyFilePath(void) const;
+
+    void setAuthToken(const QString &token);
+    QString getAuthToken(void) const;
+
 private slots:
     void on_hostAddButton_clicked(void);
     void on_hostDelButton_clicked(void);

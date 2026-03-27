@@ -46,6 +46,7 @@
 #include "applications/gqrx/recentconfig.h"
 #include "applications/gqrx/remote_control.h"
 #include "applications/gqrx/receiver.h"
+#include "applications/gqrx/remote_control_https.h"
 
 namespace Ui {
     class MainWindow;  /*! The main window UI */
@@ -125,6 +126,7 @@ private:
     receiver *rx;
 
     RemoteControl *remote;
+    RemoteControlHttps *remoteHttps;
 
     std::map<QString, QVariant> devList;
 
@@ -235,6 +237,7 @@ private slots:
     void on_actionFullScreen_triggered(bool checked);
     void on_actionRemoteControl_triggered(bool checked);
     void on_actionRemoteConfig_triggered();
+    void on_actionHttpsConfig_triggered();
     void on_actionAFSK1200_triggered();
     void on_actionUserGroup_triggered();
     void on_actionNews_triggered();

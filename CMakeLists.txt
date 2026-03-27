@@ -11,7 +11,7 @@ if(IS_RELEASE)
     if(${PROJECT_NAME}_PATCH EQUAL 0)
         set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}")
     else()
-        set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}.${${PROJECT_NAME}_PATCH}")
+        set(VERSION "${${PROJECT_NAME}_MAJOR}.${${${PROJECT_NAME}_MINOR}.${${PROJECT_NAME}_PATCH}")
     endif()
 else()
     execute_process(

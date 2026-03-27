@@ -79,6 +79,69 @@ QStringList RemoteControlSettings::getHosts(void) const
     return list;
 }
 
+/*! \brief Set HTTPS server enabled/disabled.
+ *  \param enabled The new enabled state.
+ */
+void RemoteControlSettings::setHttpsEnabled(bool enabled)
+{
+    ui->httpsEnabledCheckBox->setChecked(enabled);
+}
+
+/*! \brief Get current value from the HTTPS enabled checkbox.
+ *  \return The current enabled state.
+ */
+bool RemoteControlSettings::getHttpsEnabled(void) const
+{
+    return ui->httpsEnabledCheckBox->isChecked();
+}
+
+/*! \brief Set HTTPS server certificate file path.
+ *  \param filePath The new certificate file path.
+ */
+void RemoteControlSettings::setCertFilePath(const QString &filePath)
+{
+    ui->certFilePathLineEdit->setText(filePath);
+}
+
+/*! \brief Get current value from the certificate file path line edit.
+ *  \return The current certificate file path.
+ */
+QString RemoteControlSettings::getCertFilePath(void) const
+{
+    return ui->certFilePathLineEdit->text();
+}
+
+/*! \brief Set HTTPS server key file path.
+ *  \param filePath The new key file path.
+ */
+void RemoteControlSettings::setKeyFilePath(const QString &filePath)
+{
+    ui->keyFilePathLineEdit->setText(filePath);
+}
+
+/*! \brief Get current value from the key file path line edit.
+ *  \return The current key file path.
+ */
+QString RemoteControlSettings::getKeyFilePath(void) const
+{
+    return ui->keyFilePathLineEdit->text();
+}
+
+/*! \brief Set authentication token.
+ *  \param token The new authentication token.
+ */
+void RemoteControlSettings::setAuthToken(const QString &token)
+{
+    ui->authTokenLineEdit->setText(token);
+}
+
+/*! \brief Get current value from the authentication token line edit.
+ *  \return The current authentication token.
+ */
+QString RemoteControlSettings::getAuthToken(void) const
+{
+    return ui->authTokenLineEdit->text();
+}
 
 /*! \brief Add a new entry to the list of allowed hosts.
  *
@@ -102,5 +165,3 @@ void RemoteControlSettings::on_hostDelButton_clicked(void)
     // see http://stackoverflow.com/questions/7008423/how-do-i-remove-all-the-selected-items-in-a-qlistwidget
     qDeleteAll(ui->hostListWidget->selectedItems());
 }
-
-
